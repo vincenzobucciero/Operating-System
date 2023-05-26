@@ -18,7 +18,7 @@ int var_glob = 0;
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
 void *routine() {
-    int n = rand() % 10 + 1;
+    int n = rand() % 2 + 1;
     printf("Thread %ld sleeping for %d seconds\n", pthread_self(), n);
     sleep(n);
 
@@ -36,13 +36,13 @@ int main() {
     scanf(" %d", &n);
 
     pthread_t *tid = malloc(n*sizeof(pthread_t));
-    int **taskids = malloc(n*sizeof(int*));
+    // int **taskids = malloc(n*sizeof(int*));
 
     for(int i=0; i<n; i++) {
-        taskids[i] = malloc(sizeof(int));
-        *taskids[i] = i;
+        //taskids[i] = malloc(sizeof(int));
+        //*taskids[i] = i;
         printf("Creating thread %d\n", i);
-        rc = pthread_create(&tid[i], NULL, routine, (void *) taskids[i]);
+        rc = pthread_create(&tid[i], NULL, routine, NULL);
 
         if (rc)
         {
