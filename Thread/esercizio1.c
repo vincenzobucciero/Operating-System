@@ -38,7 +38,7 @@ int main() {
     pthread_t *tid = malloc(n*sizeof(pthread_t));
     // int **taskids = malloc(n*sizeof(int*));
 
-    for(int i=0; i<n; i++) {
+    for(int i = 0; i < n; i++) {
         //taskids[i] = malloc(sizeof(int));
         //*taskids[i] = i;
         printf("Creating thread %d\n", i);
