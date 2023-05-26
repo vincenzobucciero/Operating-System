@@ -15,24 +15,31 @@
 #include <unistd.h>
 
 int var_glob = 0;
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
 void *routine() {
     int n = rand() % 10 + 1;
     printf("Thread %ld sleeping for %d seconds\n", pthread_self(), n);
     sleep(n);
+
+    pthread_mutex_lock(&mutex);
     var_glob++;
+    pthread_mutex_unlock(&mutex);
+
+    pthread_exit(NULL);
 }
 
 int main() {
     int n, rc;
-    pthread_t tid[n];
-    int *taskids[n];
 
     printf("Inserisci numero di thread:  ");
     scanf(" %d", &n);
 
+    pthread_t *tid = malloc(n*sizeof(pthread_t));
+    int **taskids = malloc(n*sizeof(int*));
+
     for(int i=0; i<n; i++) {
-        taskids[i] = (int *) malloc(sizeof(int));
+        taskids[i] = malloc(sizeof(int));
         *taskids[i] = i;
         printf("Creating thread %d\n", i);
         rc = pthread_create(&tid[i], NULL, routine, (void *) taskids[i]);
@@ -41,12 +48,20 @@ int main() {
         {
             printf("ERROR, return code from pthread_create() is %d\n", rc);
             exit(-1);
-        }
-        
+        }  
     }
+
+    for (int i = 0; i < n; i++) {
+        rc = pthread_join(tid[i], NULL);
+        if (rc) {
+            printf("ERROR, return code from pthread_join() is %d\n", rc);
+            exit(-1);
+        }
+    }
+
     printf("Variabile globale:  %d\n", var_glob);
 
-    pthread_exit(NULL);
+    return 0;
 
 }
 
