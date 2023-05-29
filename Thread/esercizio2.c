@@ -45,7 +45,7 @@ void *routine(void *arg) {
 
     //Conto le occorrenze
     int ch;
-    while ((ch == fgetc(file)) != EOF && ftell <= data->end)    
+    while ((ch = fgetc(file)) != EOF && ftell(file) <= data->end)    
     {
         if (ch == data->search_char)
         {
@@ -83,19 +83,22 @@ int main() {
     
     fseek(file, 0, SEEK_END);
     file_length = ftell(file);
+
     fclose(file);
 
-    pthread_t *threads = (pthread_t*)malloc(n*sizeof(pthread_t));
+    threads = (pthread_t*)malloc(n*sizeof(pthread_t));
 
     thread_data = (threadData*)malloc(n*sizeof(threadData));
 
     int portion_size = file_length/n;
+
     for(int i = 0; i < n; i++) {
         thread_data[i].filename = filename;
         thread_data[i].search_char = search_char;
         thread_data[i].start = portion_size*i;
         thread_data[i].end = (i == n - 1) ? file_length - 1 : (i + 1) * portion_size - 1;
         thread_data[i].count = 0;
+
         pthread_create(&threads[i], NULL, routine, (void*)&thread_data[i]);
     }
 
@@ -109,4 +112,6 @@ int main() {
 
     free(threads);
     free(thread_data);
+
+    return 0;
 }
