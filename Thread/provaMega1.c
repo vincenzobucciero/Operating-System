@@ -12,7 +12,9 @@
 #include <pthread.h>
 #include <unistd.h>
 
-
+void *cercaMinimo(void *arg) {
+    
+}
 
 int main() {
     int n;
