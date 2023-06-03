@@ -25,6 +25,9 @@
 #include <stdlib.h>
 #include <pthread.h>
 
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+int minSommaParziale = __INT_MAX__;
+
 typedef struct {
     int n;
     int **matrice;
@@ -35,7 +38,7 @@ void *routine(void *arg) {
     threadData *data = (threadData *)arg;
     int index = data->threadIndex;
 
-    int sommaParziale = 0;
+    data->sommaParziale = 0;
     int *row = data->matrice[index];
 
     // Array dinamico per gli elementi sommati
@@ -44,13 +47,13 @@ void *routine(void *arg) {
 
     if(index % 2 == 0) {
         for(int i = 0; i < data->n; i+=2) {
-            sommaParziale += row[i];
+            data->sommaParziale += row[i];
             elementiSommati[count] = row[i];
             count++;
         }
     } else {
         for(int i = 1; i < data->n; i+=2) {
-            sommaParziale += row[i];
+            data->sommaParziale += row[i];
             elementiSommati[count] = row[i];
             count++;
         }
@@ -61,11 +64,17 @@ void *routine(void *arg) {
         printf(" -> %d ", elementiSommati[i]);
     }
     printf("\n");
-    printf("Somma parziale riga %d -> %d\n\n", index, sommaParziale);
+    printf("Somma parziale riga %d -> %d\n\n", index, data->sommaParziale);
+
+    pthread_mutex_lock(&mutex);
+    if(data->sommaParziale < minSommaParziale) {
+        minSommaParziale = data->sommaParziale;
+    }
+    pthread_mutex_unlock(&mutex);
 
     // Restituisci la somma come risultato del thread
     int *result = malloc(sizeof(int));
-    *result = sommaParziale;
+    *result = data->sommaParziale;
 
     pthread_exit(result);
 }
@@ -113,8 +122,6 @@ int main() {
         }
     }
 
-    int minSommaParziale = __INT_MAX__;
-
     //Attendere la terminazione dei thread e raccogliere i risultati
     //e Calcolo somma parziale minima tra tutti i thread
     for (int i = 0; i < n; i++) {
@@ -124,14 +131,10 @@ int main() {
             exit(EXIT_FAILURE);
         }
 
-        if(*result < minSommaParziale) {
-            minSommaParziale = *result;
-        }
-
         free(result);
     }
 
-     printf("La somma minima è: %d\n", minSommaParziale);
+    printf("La somma minima è: %d\n", minSommaParziale);
 
     return 0;
 }
