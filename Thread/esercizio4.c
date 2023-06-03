@@ -25,109 +25,113 @@
 #include <stdlib.h>
 #include <pthread.h>
 
-// Direttive al processore
-#define MAXVAL 255 // Valore massimo che si può produrre
-#define SIZE 6 // Size della matrice quadrata - Numero di Thread
-
-// Variabili globali
-int** matrix;
-int minimo = MAXVAL * SIZE;
-
-// Mutex
-pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-
-void allocationMatrix() {
-    matrix = ( int** ) calloc( SIZE, sizeof( int* ) );
-    for ( int i = 0; i < SIZE; i++ )
-        matrix[i] = ( int* ) calloc( SIZE, sizeof( int ) );
-}
-
-void initMatrix() {
-    for ( int i = 0; i < SIZE; i++ )
-        for ( int j = 0; j < SIZE; j++ )
-            matrix[i][j] = rand() % MAXVAL + 1;
-}
-
-void printMatrix() {
-    for ( int i = 0; i < SIZE; i++ ) {
-        printf( "%d: ", i );
-        for ( int j = 0; j < SIZE; j++ ) {
-            int val = matrix[i][j];
-            if ( val < 100 && val > 9 )
-                printf( "%d     ", val );
-            else if ( val < 9 )
-                printf( "%d      ", val );
-            else 
-                printf( "%d    ", val );
-        }
-        printf( "\n" );
-    }
-}
-
-void deallocationMatrix() {
-    for ( int i = 0; i < SIZE; i++ )
-        free( matrix[i] );
-    free( matrix );
-}
+typedef struct {
+    int n;
+    int **matrice;
+    int threadIndex;
+} threadData;
 
 void *routine(void *arg) {
-    pthread_t* myTid = ( pthread_t* ) arg;
-    printf( "\nMy Tid è: %ld", *myTid );
+    threadData *data = (threadData *)arg;
+    int index = data->threadIndex;
 
-    // Variabile locale
-    int parzialSum = 0;
+    int sommaParziale = 0;
+    int *row = data->matrice[index];
 
-    if ( *myTid % 2 == 0 ) {
-        // Sono pari
-        for ( int j = 0; j < SIZE; j += 2 )
-            parzialSum += matrix[ *myTid ][j];
+    // Array dinamico per gli elementi sommati
+    int *elementiSommati = malloc(data->n * sizeof(int));
+    int count = 0;
+
+    if(index % 2 == 0) {
+        for(int i = 0; i < data->n; i+=2) {
+            sommaParziale += row[i];
+            elementiSommati[count] = row[i];
+            count++;
+        }
     } else {
-        // Sono dispari
-        for ( int j = 1; j < SIZE; j += 2 )
-            parzialSum += matrix[ *myTid ][j];
+        for(int i = 1; i < data->n; i+=2) {
+            sommaParziale += row[i];
+            elementiSommati[count] = row[i];
+            count++;
+        }
     }
 
-    // eseguo il controllo del minimo
-    // in mutua esclusione essendo soggeto 
-    // a race condiction
-    pthread_mutex_lock( &mutex );
-    if ( parzialSum < minimo )
-        minimo = parzialSum;
-    pthread_mutex_unlock( &mutex );
+    printf("Somma parziale riga %d -> Elementi sommati : ", index);
+    for(int i = 0; i < count; i++) {
+        printf(" -> %d ", elementiSommati[i]);
+    }
+    printf("\n");
+    printf("Somma parziale riga %d -> %d\n\n", index, sommaParziale);
 
-    pthread_exit(NULL);
+    // Restituisci la somma come risultato del thread
+    int *result = malloc(sizeof(int));
+    *result = sommaParziale;
+
+    pthread_exit(result);
 }
 
 int main() {
+    int n;
+
+    printf("Inserisci dimensione matrice:  ");
+    scanf("%d", &n);
+
+    //Allocazione matrice
+    int **matrice = (int**)malloc(n*sizeof(int*));
+    for(int i = 0; i < n; i++) {
+        matrice[i] = (int*)malloc(n*sizeof(int));
+    }
+
+    //Assegno valori casuali alla matrice
     srand(time(NULL));
-    allocationMatrix();
-    initMatrix();
-    printf( "\nMatrix:\n" );
-    printMatrix();
-
-    pthread_t threads[SIZE];
-
-     // Creazione Thread
-    for ( int i = 0; i < SIZE; i++ ) {
-        int* tid = ( int* ) malloc( sizeof( int ) );
-        *tid = i;
-        if ( pthread_create( &threads[i], NULL, routine, (void*) tid ) != 0) {
-            perror( "Errore nella creazione dei Thread" );
-            exit( EXIT_FAILURE );
+    for(int i = 0; i < n; i++) {
+        for(int j = 0; j < n; j++) {
+            matrice[i][j] =rand()%10+1;
         }
     }
 
-    // Attendo i Thread
-    for ( int i = 0; i < SIZE; i++ ) {
-        if ( pthread_join( threads[i], NULL ) != 0 ) {
-            perror( "Errore nella join dei Thread" );
-            exit( EXIT_FAILURE );
+    //Stampa della matrice
+    for(int i = 0; i < n; i++) {
+        for(int j = 0; j < n; j++) {
+            printf("%d\t",matrice[i][j]);
+        }
+        printf("\n");
+    }
+
+    pthread_t threads[n];
+    threadData data[n];
+
+    //Creo thread
+    for(int i = 0; i < n; i++) {
+        data[i].n = n;
+        data[i].matrice = matrice;
+        data[i].threadIndex = i;
+
+        if(pthread_create(&threads[i], NULL, routine, (void*)&data[i]) != 0) {
+            printf("Errore nella creazione del thread.\n");
+            exit(EXIT_FAILURE);
         }
     }
 
-    printf( "\nIl minimo è: %d", minimo );
-    deallocationMatrix();
-    printf( "\n" );
-    exit( EXIT_SUCCESS );
+    int minSommaParziale = __INT_MAX__;
+
+    //Attendere la terminazione dei thread e raccogliere i risultati
+    //e Calcolo somma parziale minima tra tutti i thread
+    for (int i = 0; i < n; i++) {
+        int *result;
+        if (pthread_join(threads[i], (void*)&result) != 0) {
+            printf("Errore nella join del thread.\n");
+            exit(EXIT_FAILURE);
+        }
+
+        if(*result < minSommaParziale) {
+            minSommaParziale = *result;
+        }
+
+        free(result);
+    }
+
+     printf("La somma minima è: %d\n", minSommaParziale);
+
     return 0;
 }
