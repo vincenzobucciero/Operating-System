@@ -77,7 +77,6 @@ int main() {
     //Creo un array di 'n' strutture data da poi passare ai thread
     threadData data[n];
     //Calcolo quante righe deve gestire ciascun thread
-    int righe_per_thread = n / n; //Poichè il num dei thread è uguale alle dim della matrice, ogni thread gestisce una riga
 
     for(int i = 0; i < n; i++) {
         data[i].n = n;
