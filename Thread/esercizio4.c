@@ -38,7 +38,7 @@ void *routine(void *arg) {
     threadData *data = (threadData *)arg;
     int index = data->threadIndex;
 
-    data->sommaParziale = 0;
+    int sommaParziale = 0;
     int *row = data->matrice[index];
 
     // Array dinamico per gli elementi sommati
@@ -47,13 +47,13 @@ void *routine(void *arg) {
 
     if(index % 2 == 0) {
         for(int i = 0; i < data->n; i+=2) {
-            data->sommaParziale += row[i];
+            sommaParziale += row[i];
             elementiSommati[count] = row[i];
             count++;
         }
     } else {
         for(int i = 1; i < data->n; i+=2) {
-            data->sommaParziale += row[i];
+            sommaParziale += row[i];
             elementiSommati[count] = row[i];
             count++;
         }
@@ -64,17 +64,17 @@ void *routine(void *arg) {
         printf(" -> %d ", elementiSommati[i]);
     }
     printf("\n");
-    printf("Somma parziale riga %d -> %d\n\n", index, data->sommaParziale);
+    printf("Somma parziale riga %d -> %d\n\n", index, sommaParziale);
 
     pthread_mutex_lock(&mutex);
-    if(data->sommaParziale < minSommaParziale) {
-        minSommaParziale = data->sommaParziale;
+    if(sommaParziale < minSommaParziale) {
+        minSommaParziale = sommaParziale;
     }
     pthread_mutex_unlock(&mutex);
 
     // Restituisci la somma come risultato del thread
     int *result = malloc(sizeof(int));
-    *result = data->sommaParziale;
+    *result = sommaParziale;
 
     pthread_exit(result);
 }
