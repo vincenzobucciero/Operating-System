@@ -109,10 +109,22 @@ void *sommaColonnaCentrale(void *arg) {
     pthread_exit(NULL);
 }
 
+/*
 void allocaMatrice(threadData *data) {
     printf("Inserisci dimensione matrice:  ");
     scanf("%d", &data->n);
 
+    data->matrice = (int**)calloc(data->n, sizeof(int*));
+    for(int i = 0; i < data->n; i++) {
+        data->matrice[i] = (int*)calloc(data->n, sizeof(int));
+    }
+
+    pthread_mutex_init(&data->myMutex, NULL);
+}
+*/
+
+void allocaMatrice(threadData *data, int n) {
+    data->n = n;
     data->matrice = (int**)calloc(data->n, sizeof(int*));
     for(int i = 0; i < data->n; i++) {
         data->matrice[i] = (int*)calloc(data->n, sizeof(int));
@@ -148,10 +160,22 @@ void deallocaMatrice(threadData *data) {
     pthread_mutex_destroy(&data->myMutex);
 }
 
-int main() {
+int main(int argc, char *argv[]) {
     threadData data;
 
-    allocaMatrice(&data);
+    if (argc < 2) {
+        printf("Utilizzo: %s dimensione_matrice\n", argv[0]);
+        return 1;
+    }
+
+    int n = atoi(argv[1]);
+
+    if (n % 2 != 1) {
+        printf("La dimensione della matrice deve essere un numero dispari.\n");
+        return 1;
+    }
+
+    allocaMatrice(&data, n);
     riempiMatrice(&data);
     stampaMatrice(&data);
 
