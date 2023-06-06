@@ -15,10 +15,12 @@
 typedef struct {
     int **matrice;
     int n;
+    int threadId;
     pthread_mutex_t myMutex;
 } threadData;
 
 int maxSomma = 0;
+//pthread_t maxThreadID;
 int sommaDiagDx = 0;
 int sommaDiagSx = 0;
 int sommaRigaCentr = 0;
@@ -40,6 +42,7 @@ void *sommaDiagonaleDx(void *arg) {
 
     if (s > maxSomma) {
         maxSomma = s;
+        //maxThreadID = pthread_self();
     }
 
     pthread_exit(NULL);
@@ -61,6 +64,7 @@ void *sommaDiagonaleSx(void *arg) {
 
     if (s > maxSomma) {
         maxSomma = s;
+        //maxThreadID = pthread_self();    
     }
 
     pthread_exit(NULL);
@@ -82,6 +86,7 @@ void *sommaRigaCentrale(void *arg) {
 
     if (s > maxSomma) {
         maxSomma = s;
+        //maxThreadID = pthread_self();
     }
 
     pthread_exit(NULL);
@@ -104,6 +109,7 @@ void *sommaColonnaCentrale(void *arg) {
 
     if (s > maxSomma) {
         maxSomma = s;
+        //maxThreadID = pthread_self();
     }
 
     pthread_exit(NULL);
@@ -213,6 +219,8 @@ int main(int argc, char *argv[]) {
     printf("Somma colonna centrale: %d\n", sommaColonnaCentr);
     printf("\n");
     printf("Somma di Massimo valore: %d\n", maxSomma);
+    
+    //printf("Calcolato dal thread con ID: %ld\n", maxThreadID);
 
     deallocaMatrice(&data);
 }
