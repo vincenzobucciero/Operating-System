@@ -26,9 +26,9 @@ void *routine(void *arg){
     for (int i = 0; i < data->n; i++) {
         avg += data->vettore[data->threadId * (data->n / 4) + i];
     }
-    avg = data->n / 4;
+    avg /= data->n / 4;
 
-    for(int i = 0; i < data->n; i++){
+    for(int i = 0; i < data->n / 4; i++){
         if (data->vettore[data->threadId * (data->n / 4) + i] < avg) {
             s++;
         }
