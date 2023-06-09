@@ -4,7 +4,6 @@
  * nella  prima  posizione  di  un  file  temporaneo  opportunamente  creato.  
  * Implementare  il  programma con i thread ed i semafori Posix.
 */
-//se tu dall'altipiano guardi il mare, moretta che sei schiava tra gli schiavi ti porteremo noi fra tante navi ed un tricolore sventolar per te,
 
 #include <stdio.h>
 #include <stdlib.h>
