@@ -10,6 +10,9 @@
  *  termina.
 */
 
+
+//SOLUZIONE CON CICLO FOR, QUINDI NON WHILE(1).
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
