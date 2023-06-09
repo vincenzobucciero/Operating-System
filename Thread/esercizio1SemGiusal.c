@@ -14,15 +14,70 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <unistd.h>
+#include <semaphore.h>
+
+#define FILE_NAME "fileGiusal1.txt"
+
+typedef struct {
+    int currentNumber;
+    int totalNumber;
+    sem_t semProd;
+    sem_t semCons;
+} sharedData;
 
 int n;
 
 void *routineProduttore(void *arg){
+    sharedData *data = (sharedData *)arg;
+    FILE *file = fopen(FILE_NAME, "w");
 
+    if(file == NULL){
+        perror("Errore apertura file\n");
+        exit(EXIT_FAILURE);
+    }
+
+    int fib;
+    int fib1 = 0;
+    int fib2 = 1;
+
+    fprintf(file, " %d\n", fib1);
+
+    for(int i = 0; i < data->totalNumber; i++){
+        sem_wait(&data->semProd);
+        sleep(1/2);
+        fib = fib1 + fib2;
+        fprintf(file, " %d\n", fib);
+        fflush(file);
+        fib1 = fib2;
+        fib2 = fib;
+        sem_post(&data->semCons);
+    }
+
+    fclose(file);
+
+    pthread_exit(NULL);
 }
 
 void *routineConsumatore(void *arg){
+    sharedData *data = (sharedData *)arg;
 
+    FILE *file = fopen(FILE_NAME, "r");
+
+    if(file == NULL){
+        perror("Errore apertura file\n");
+        exit(EXIT_FAILURE);
+    }
+
+    for(int i = 0; i < data->totalNumber; i++){
+        sem_wait(&data->semCons);
+        fscanf(file, "%d", &data->currentNumber);
+        printf("Numero fibo letto:  %d\n", data->currentNumber);
+        sem_post(&data->semProd);
+    }
+
+    fclose(file);
+
+    pthread_exit(NULL);
 }
 
 int main(int argc, char *argv[]){
@@ -32,6 +87,46 @@ int main(int argc, char *argv[]){
 
     n = atoi(argv[1]);
 
-    
+    if (n < 10 || n > 15) {
+        printf("Numero non valido. Inserire un numero intero 10<=N<=15\n");
+        return 1;
+    }
+
+    sharedData data;
+    data.currentNumber = 0;
+    data.totalNumber = n;
+
+    sem_init(&data.semProd, 0, 1);
+    sem_init(&data.semCons, 0, 0);
+
+    pthread_t produttore, consumatore;
+
+    if(pthread_create(&produttore, NULL, routineProduttore, (void*)&data) != 0){
+        perror("Errore creazione produttore\n");
+        exit(EXIT_FAILURE);
+    }
+
+    if(pthread_create(&consumatore, NULL, routineConsumatore, (void*)&data) != 0){
+        perror("Errore creazione consumatore\n");
+        exit(EXIT_FAILURE);
+    }
+
+    if(pthread_join(produttore, NULL) != 0){
+        perror("Errore join produttore\n");
+        exit(EXIT_FAILURE);
+    }
+
+    if(pthread_join(consumatore, NULL) != 0){
+        perror("Errore join consumatore\n");
+        exit(EXIT_FAILURE);
+    }
+
+    sem_destroy(&data.semProd);
+    sem_destroy(&data.semCons);
+
+    printf("Operazioni concluse, arrivederci dal thread: tid\n ");
+    sleep(5);
+
+    return 0;
 }
 
