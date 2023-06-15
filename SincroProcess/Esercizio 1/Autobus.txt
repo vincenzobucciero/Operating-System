@@ -19,10 +19,9 @@ semaphore bus_arrivato := 0;
 semaphore passeggeri_scesi := 0;
 
 ProcessoPasseggeroDiscesa():
-    wait(bus_arrivato)
     lock(myMutex);
     indice_porta = rand() % 3;
-    if(posti_a_sedere < N)
+    //if(posti_a_sedere < N)
         posti_a_sedere++
         passeggeri_seduti[ind_pass] = false;
         ind_pass++;
@@ -49,6 +48,5 @@ ProcessoPasseggeroSalita():
         unlock(mutex)
         {Non salire su autobus}
     unlock(myMutex);
-    signal(bus_arrivato)
     
 
