@@ -1,0 +1,49 @@
+/**
+    In un sistema sono attivi N (N multiplo di 3) processi che si autorganizzano in 
+    tre gruppi seguendo il seguente schema:
+
+        1. Inizialmente tutti competono per entrare nel gruppo G1 ma solo N/3 vi accedono;
+        2. I restanti processi competono per entrare nle gruppo G2 ma solo N/3 vi accedono;
+        3. I restanti N/3 processi sono assegnati al gruppo G3.
+
+    Creati i gruppi, i processi appartenenti a G1, a turno ed all'infinito, scelgono un gruppo
+    random G (G2 o G3), un numero random P in [0, N/3-1] e producono
+    un elemento che verrà consumato dal processo P appartenente al gruppo G.
+*/
+
+Processo():
+    lock(mutex)
+        if(ind_G1 < N/3)
+            G1[ind_G1] = processo
+            ind_G1++
+            gruppo = 0
+        else if(ind_G2 < N/3)
+            G2[ind_G2] = processo
+            ind_G2++
+            gruppo = 1
+        else 
+            G3[ind_G3] = processo
+            ind_G3++
+            gruppo = 2
+    unlock(mutex)
+    for i = 0 to N/3
+        wait(vuoto)
+        lock(mutex)
+            if(gruppo == 0)
+                G = rand[1, 2]
+                P = rand[0, N/3-1]
+                prodotto = produco_elemento()
+                unlock(mutex)
+                signal(pieno)
+        wait(pieno)
+        if(prodotto != null)
+            lock(mutex)
+                consumato = consuma(prodotto, P, G)
+            unlock(mutex)
+            signal(vuoto)
+
+            
+
+
+
+
