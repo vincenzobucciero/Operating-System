@@ -1,0 +1,75 @@
+/**
+    In una pizzeria, due pizzaioli sfornano continuamente pizze che pongono di volta in volta 
+    in uno degli N piatti disponibili sul bancone.
+
+    I piatti sono prelevati da M (M < N) camerieri che servano ai tavoli.
+
+    Ciascun cameriere può portare 2 pizze per volta
+
+    In caso di affollamento possono portare 3 pizze per volta 
+
+    Pizzaiolo -> Aspetta che ci siano piatti disponibili sul bancone
+                    Sforna pizza
+
+    Cameriere -> Controlla se ci sta affollamento
+                    -> Se si, porta 3 pizze
+                    -> Se no, porta due pizze
+                Aspetta che il cliente mangi la pizza
+                Riporta piatto sul bancone
+*/
+
+
+int N; // Numero totale di piatti disponibili sul bancone
+int M; // Numero di camerieri
+int tot_persone; // Numero totale di persone in sala
+int persone_in_sala = 0; // Numero di persone presenti in sala al momento
+
+semaphore piatti_disponibili = N; // Semaforo per monitorare i piatti disponibili sul bancone
+semaphore pizza_pronta = 0; // Semaforo per segnalare che una pizza è pronta
+semaphore mutex = 1; // Semaforo per la mutua esclusione
+semaphore cliente_mangia = 0; // Semaforo per segnalare che il cliente può mangiare
+semaphore prendi_piatti = 0; // Semaforo per segnalare al cameriere di prendere i piatti
+
+int indice = 0; // Indice per il vettore piatto[]
+
+int piatto[N]; // Vettore per memorizzare i piatti sul bancone
+int piatto_cameriere[3]; // Vettore per memorizzare i piatti assegnati al cameriere
+
+
+ProcessoPizzaiolo():
+    wait(piatti_disponibili)
+    lock(mutex)
+        piatto[indice] = sforna_pizza()
+        indice++
+    unlock(mutex)
+    signal(pizza_pronta)
+
+ProcessoCameriere():
+    lock(mutex)
+        wait(pizza_pronta)
+        if(persone_in_sala < tot_persone)
+            for i = 0 to 2
+            lock(mutex)
+                piatto_cameriere[i] = prendi_piatto()
+            unlock(mutex)
+            {Servi pizza}
+            signal(cliente_mangia)
+            wait(prendi_piatti)
+            for i = 0 to 2
+                signal(piatti_disponibili)
+        else
+            for i = 0 to 3
+            lock(mutex)
+                piatto_cameriere[i] = prendi_piatto()
+            unlock(mutex)
+            {Servi pizza}
+            signal(cliente_mangia)
+            wait(prendi_piatti)
+            for i = 0 to 3
+                signal(piatti_disponibili)
+
+
+ProcessoCliente():
+    wait(cliente_mangia)
+    {Mangia Pizza}
+    signal(prendi_piatti)
