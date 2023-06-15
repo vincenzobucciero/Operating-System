@@ -1,0 +1,62 @@
+/**
+    In un ristorante piu persone siedono allo stesso tavolo e condividono B1 bottiglie di acqua
+    e B2 bottiglie di vino.
+
+    La politica della mensa è che:
+    un operatore della mensa controlla se terminano le bottiglie e le sostituisce se sono vuote,
+    fin quando le persone non decidono di lasciare il ristorante.
+*/
+
+Cliente -> Arriva al ristorante
+            Siede al tavolo 
+            Beve
+            Esce dal ristorante
+
+Operatore -> Controlla se le bottiglie sono vuote
+                Sostituisce bottiglie vuote
+
+array B1[], array B2[]
+
+semaforo_contatore clientePronto = N 
+semaforo acqua_piena
+semaforo acqua_vuota
+semaforo vino_pieno
+semaforo vino_vuoto
+
+bool acqua_presa, vino_preso
+int ind_acqua, ind_vino = 0;
+
+
+ProcessoCliente():
+    wait(clientePronto)
+    wait(acqua_piena)
+    lock(mutex)
+        if(acqua_presa)
+            B1[ind_acqua] = acqua
+            ind_acqua--
+            signal(acqua_vuota)
+    unlock(mutex)
+    wait(vino_pieno)
+    lock(mutex)
+        if(vino_preso)
+            B2[ind_vino] = vino
+            ind_vino--
+            signal(vino_vuoto)
+    unlock(mutex)
+    signal(clientePronto)
+
+ProcessoOperatore():
+    wait(acqua_vuota)
+    lock(mutex)
+        {Sostituisci acqua}
+        B1[ind_acqua] = acqua
+        ind_acqua++
+        signal(acqua_piena)
+    unlock(mutex)
+    wait(vino_vuoto)
+    lock(mutex)
+        {Sostituisci vino}
+        B2[ind_vino] = vino
+        ind_vino++
+        signal(vino_pieno)
+    unlock(mutex)

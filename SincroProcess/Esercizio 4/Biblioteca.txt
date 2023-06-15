@@ -1,0 +1,65 @@
+/**
+    In una biblioteca universitaria possono entrare al più N studenti.
+
+    Ogni studente può richiedere al bibliotecario un volume degli M a disposizione.
+
+    Ogni volume ha K copie.
+*/
+
+Studente -> Arriva in biblioteca
+            Aspetta il proprio turno
+            Richiede uno o più volumi (M) con le relative coppie di libri
+            Riconsegna il libro
+            Esce dalla biblioteca
+
+Bibliotecario ->    Aspetta che ci siano studenti
+                    Aspetta richiesta
+                    Esaudisce richiesta
+                    Aspetta riconsegna libro
+                    Posa libro
+
+semaforo_contatore studente_pronto = N;
+semaforo bibliotecario_disponibile = 1;
+semaforo richiesta_effettuata = 0;
+semaforo riconsegna_libro = 0;
+
+int indice_libro = 0;
+mutex mutex = 1;
+
+define M e K
+
+array libro[M];
+array richiesta_stud[M];
+
+ProcessoStudente():
+    wait(studente_pronto)
+    wait(bibliotecario_disponibile)
+    lock(mutex)
+        if(indice_libro < M)
+            signal(richiesta_effettuata)
+            libro[indice_libro] = richiesta_stud
+            indice_libro++
+    unlock(mutex)
+    {Leggi libro}
+    signal(riconsegna_libro)
+    signal(bibliotecario_disponibile)
+    signal(studente_pronto)
+
+
+ProcessoBibliotecario():
+    wait(richiesta_effettuata)
+    lock(mutex)
+        if(indice_libro > 0)
+            indice_libro--
+            libro_richiesto = libro[indice_libro]
+            unlock(mutex)
+            wait(riconsegna_libro)
+        else
+            unlock(mutex)
+            wait(riconsegna_libro)
+            
+
+
+
+
+
