@@ -1,0 +1,54 @@
+/**
+    Un autobus è dotato di N posti a sedere ed M posti in piedi. L'accesso dei passeggeri all'autobus 
+    avviene mediante tre entrate:
+        1. Una posizionata in testa;
+        2. Una in coda;
+        3. Una al centro;
+    Tutte le entrate possono essere utilizzate sia per salire che per scendere dall'autobus.
+    Supposizioni: si sale/scende uno alla volta dando precedenza a chi scende su tutte le porte
+*/
+
+int posti_a_sedere := N
+int posti_in_piedi := M 
+int indice_porta := 0;
+int ind_pass := 0;
+
+mutex myMutex := 1
+bool passeggeri_seduti[N];
+semaphore bus_arrivato := 0;
+semaphore passeggeri_scesi := 0;
+
+ProcessoPasseggeroDiscesa():
+    wait(bus_arrivato)
+    lock(myMutex);
+    indice_porta = rand() % 3;
+    if(posti_a_sedere < N)
+        posti_a_sedere++
+        passeggeri_seduti[ind_pass] = false;
+        ind_pass++;
+    else
+        posti_in_piedi++;
+        ind_pass++;
+    unlock(myMutex)
+    signal(passeggeri_scesi)
+
+ProcessoPasseggeroSalita():
+    wait(passeggeri_scesi)
+    indice_porta = rand() % 3;
+    lock(myMutex);
+    if(posti_a_sedere > 0)
+        posti_a_sedere--;
+        passeggeri_seduti[ind_pass] = true;
+        ind_pass++;
+        {Sali su autobus}
+    else if(posti_in_piedi > 0)
+        posti_in_piedi--;
+        ind_pass++;
+        {Sali su autobus}
+    else
+        unlock(mutex)
+        {Non salire su autobus}
+    unlock(myMutex);
+    signal(bus_arrivato)
+    
+

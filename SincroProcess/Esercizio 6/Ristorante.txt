@@ -1,0 +1,56 @@
+/**
+    In un ristorante self-service, i clienti, dopo aver mangiato, dispongono i vassoi in M contenitori,
+    ognuno di K ripiani.
+
+    Periodicamente, un addetto sceglie un contenitore tra quelli in cui ci sono ripiani più liberi,
+    lo svuota, lava i piatti e ripoùrta il contenitore in sala
+
+    Cliente -> Arriva al ristorante
+                Aspetta che ci siano vassoi puliti liberi
+                Prende vassoio pulito
+                Mangia 
+                Posa vassoio sporco
+                Esce dal ristorante
+
+    Addetto -> Aspetta che i clienti finiscano di mangiare
+                Aspetta che i clienti posano vassoi sporchi
+                Sceglie contenitore che ha ripiani più liberi
+                Preleva vassoi sporchi
+                Lava vassoi
+                Posa vassoio pulito 
+*/
+
+ProcessoCliente():
+    wait(cliente)
+    lock(mutex)
+        wait(vassoi_disponibili)
+        if(vass_disp > 0)
+            vassoiPuliti[ind_vass_pulito] = mio_vassoio
+            ind_vass_pulito++
+            vass_disp--
+            unlock(mutex)
+            {Mangia}
+            lock(mutex)
+                vassoiSporchi[ind_vass_sporco] = mio_vassoio
+                ind_vass_sporco++
+                signal(vass_sporco_pronto)
+            unlock(mutex)
+        else
+            unlock(mutex)
+            signal(cliente)
+
+
+ProcessoAddetto():
+    wait(vass_sporco_pronto)
+    lock(mutex)
+        for i = 0 to K
+            vass_addetto = min[i]
+            vassoiSporchi[i]--
+    unlock(mutex)
+    {Lava Piatti}
+    lock(mutex)
+        for i = 0 to K
+            vass_disp++
+            signal(vassoi_disponibili)
+    unlock(mutex)
+
