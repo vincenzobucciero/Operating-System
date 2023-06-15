@@ -20,6 +20,17 @@
                 Posa vassoio pulito 
 */
 
+int M; // Numero di contenitori
+int K; // Numero di ripiani in ogni contenitore
+
+int vass_disp = M * K; // Numero totale di vassoi disponibili
+int ind_vass_pulito = 0; // Indice per vassoiPuliti
+int ind_vass_sporco = 0; // Indice per vassoiSporchi
+
+semaphore vassoi_disponibili = M * K; // Semaforo per monitorare i vassoi disponibili
+semaphore vass_sporco_pronto = 0; // Semaforo per segnalare che ci sono vassoi sporchi pronti
+semaphore mutex = 1; // Semaforo per la mutua esclusione
+
 ProcessoCliente():
     wait(cliente)
     lock(mutex)
