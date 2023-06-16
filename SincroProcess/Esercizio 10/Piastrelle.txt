@@ -1,0 +1,42 @@
+/**
+    In una fabbrica, N operai preparano piastrelle da far cuocere in un forno, 
+    capace di cuocerne M contemporaneamente.
+
+    All'uscita dal forno K operai visionano le piastrelle per decorarle
+    seguendo questa sequenza di passi:
+        -Se trova una piastrella difettata inizia a prenderne 2 alla volta dal forno;
+        -Altrimenti ne prende 1 alla volta.
+*/
+
+OperaioPreparatore -> Prepara M piastrelle
+                        Inforna piastrelle
+                        
+
+OperaioDecoratore ->    Aspetta che le piastrelle siano pronte 
+                        Controlla se la piastrella è difettata  
+                            -> Se si, ne prende 2
+                            -> Se no, ne prende 1
+
+ProcessoPreparatore():
+    wait(forno_vuoto)
+    lock(mutex)
+        for i = 0 to M 
+            piastrella[i] = metti_piastrella()
+            i++
+    unlock(mutex)
+    signal(forno_pieno)
+
+ProcessoDecoratore():
+    wait(forno_pieno)
+    lock(mutex)
+        for i = 0 to M 
+            piast_controllata = piastrella[i]
+            if(piast_controllata == rotta)
+                for i = 1 to 2
+                    piastrella[i] = decora()
+            else 
+                piastrella[i] = decora()
+    unlcok(mutex)
+    signal(forno_vuoto)
+
+                        
