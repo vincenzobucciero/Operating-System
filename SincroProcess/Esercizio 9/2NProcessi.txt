@@ -34,7 +34,6 @@ ProcessoCoordinatore():
             stampa()
             signal(stampa_processo_attivo)
 
-
 ProcessoAttivo():
     wait(numero_estratto)
     lock(mutex)
