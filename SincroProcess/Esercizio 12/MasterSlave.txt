@@ -1,0 +1,42 @@
+/**
+    Abbiamo N processi Slave e 1 processo Master 
+    Ogni processo slave inserisce in un buffer condiviso di N posizioni un numero random M, con M <= N/2.
+    Quando tutti gli Slave hanno inserito un numero si mettono in attesa, mentre il Master, trovato il 
+    numero massimo, produce Max elementi, e risveglia i processi Slave che competeranno per consumare gli 
+    elementi disponibili.
+    Terminati gli elementi da consumare i processi Slave ed il Master ripetono il procedimento dall'inizio.
+*/
+
+Slave ->    Estrae numero random M con M <= N/2
+            Inserisce numero M in un buffer condiviso di N posizioni
+            Attende la notifica del master
+            Consuma elemento buffer
+            Ripete procedimento
+
+Master ->   Attende che tutto il buffer sia stato riempito
+            Trova Max del buffer
+            Produce Max elementi
+            Notifica ai processi slave
+            Ripete procedimento
+
+ProcessoSlave():
+    lock(mutex)
+        numero = rand() % N/2
+        buffer[indice] = numero
+        indice++
+    unlock(mutex)
+    signal(aspetto_il_master)
+    wait(attiva_slave)
+    lock(mutex)
+        consuma(elementi_prodotti[i])
+        i--
+    unlock(mutex)
+
+ProcessoMaster():
+    wait(aspetto_il_master)
+    lock(mutex)
+        max = max(buffer[])
+        elementi_prodotti[i] = produci(max)
+        i++
+    unlock(mutex)
+    signal(attiva_slave)
