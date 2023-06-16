@@ -1,0 +1,50 @@
+/**
+    Il chitarrista Mancuso ha una masterclass in cui posso prendere parte N chitarristi,
+    che posso scegliere fra M modelli di chitarre, con K chitarre.
+
+    Quando tutti gli allievi hanno una chitarra, inizia masterclass.
+
+    Gli allievi che non trovano posto, prenderanno parte alla lezione successiva.
+
+    Tutto termina quando non ci sono chitarristi in attesa.
+*/
+
+Chitarrista ->  Controlla che ci siano posti disponibili
+                    -> Se si, sceglie tra M modelli di chitarre, con K chitarre
+                        -> Comincia masterclass
+                    -> Se no, partecipa alla lezione successiva
+
+Mancuso ->  Aspetta che tutti gli studenti abbiano preso una chitarra
+            Comincia lezione.
+
+
+ProcessoChitarrista():
+    lock(mutex)
+        if(postiDisponibili > 0)
+            unlock(mutex)
+            lock(mutex) 
+                chitarra_scelta = scegli(chitarra[M][K])
+                k--
+                signal(scelta_chita)
+            unlock(mutex)
+            wait(fine_lezione)
+            lock(mutex)
+                chitarra_scelta = posa(chitarra[M][K])
+                k++
+                postiDisponibili++
+            unlock(mutex)
+        else
+            lock(mutex)
+                inAttesa+1
+            unlock(mutex)
+
+ProcessoMancuso():
+    lock(mutex)
+        if(inAttesa < N)
+            unlock(mutex)
+            for i = 0 to N 
+                wait(scelta_chita)
+                {Inizia Lezione}
+                signal(fine_lezione)
+        else
+            {termina}
