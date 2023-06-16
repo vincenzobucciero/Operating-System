@@ -1,0 +1,55 @@
+/**
+    Un sistema è composto di un buffer da N processi, 2*N processi attivi ed un processo coordinatore.
+
+    Il processo coordinatore estrae uno dopo l'altro in maniera casuale i numeri da 1 a N 
+    e ad ogni estrazione i processi competono per aggiudicarsi l'accesso alla posizione corrispondente 
+    del buffer, scrivendone il proprio PID.
+
+    Un processo che ha scritto il proprio PID nel buffer NON partecipa più alla contesa.
+
+    Quando tutte le posizioni del buffer sono state assegnate, il coordinatore si alterna con l'ultimo processo
+    che ha avuto accesso al buffer nel leggere e stampare, uno alla volta, il contenuto del buffer.  
+*/
+
+
+ProcessoCoordinatore -> Estrae numero casuale
+                        Attiva ProcessiAttivi
+                        Aspetta che l'intero buffer sia pieno
+                        Quando è pieno, si alterna con l'ultimo processo per leggere e stampare
+
+ProcessoAttivo ->   Aspetta estrazione
+                    Accede alla posizione corrispondente nel buffer
+                    Scrive il proprio PID
+                    Segnala l'uscita dalla contesa
+                    Se è l'ultimo si alterna con il coordinatore per leggere e stampare
+
+
+ProcessoCoordinatore():
+    numero = rand() % N + 1 
+    signal(numero_estratto)
+    wait(pronto_per_stampare)
+    if(buffer == true)
+        for i = 0 to N 
+            wait(stampa_coordinatore)
+            stampa()
+            signal(stampa_processo_attivo)
+
+
+ProcessoAttivo():
+    wait(numero_estratto)
+    lock(mutex)
+        if(indice != 0)
+            buffer[indice] = getpid()
+            indice++
+            processoFinito++
+    unlock(mutex)
+    if(processoFinito == 2*N)
+        buffer == true
+        signal(pronto_per_stampare)
+        for i = 0 to N 
+            wait(stampa_processo_attivo)
+            stampa()
+            signal(stampa_coordinatore)
+
+
+
