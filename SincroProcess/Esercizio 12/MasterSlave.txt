@@ -19,6 +19,15 @@ Master ->   Attende che tutto il buffer sia stato riempito
             Notifica ai processi slave
             Ripete procedimento
 
+array buffer[N]
+array elementi_prodotti[max]
+int indice = 0
+int max = 0
+
+mutex mutex := 1
+sempahore aspetto_il_master := 0
+semaphore attiva_slave := 0
+
 ProcessoSlave():
     lock(mutex)
         numero = rand() % N/2
