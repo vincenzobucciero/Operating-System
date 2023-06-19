@@ -1,5 +1,5 @@
 # Operating-System
-Exercise of OS's courses
+Exercise of OS's courses.
 This repository is a collection of exercises solved for the Operating System course in the Computer Science program at Parthenope University of Naples. 
 The course is taught by professors Antonino Staiano and Giuseppe Salvi.
 
