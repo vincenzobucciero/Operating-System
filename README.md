@@ -30,7 +30,7 @@ Contributions to this repository are welcome! If you would like to contribute, p
 Please ensure that your contributions adhere to the coding conventions and guidelines established for the course. Include a clear description of the changes you have made and any relevant information for reviewers.
 
 # License
-This repository is licensed under the MIT License. You are free to use the code and solutions provided here for personal and educational purposes.
+This repository is licensed under the GPL-3.0 License. You are free to use the code and solutions provided here for personal and educational purposes.
 However, please note that any commercial use of the code or exercises may be subject to legal restrictions. Make sure to review the license file for more details.
 
 
