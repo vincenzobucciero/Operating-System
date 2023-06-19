@@ -1,4 +1,3 @@
-//NON E' IN REALTA' ESERCIZIO 3, SEGUIRE SLIDE
 
 /*
     Si realizzi un programma C e Posix sotto Linux che, utilizzando la libreria Pthread:
